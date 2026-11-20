@@ -13,6 +13,7 @@ namespace Schachbulle\ContaoClaudeBundle\Security;
 
 use Contao\BackendUser;
 use Contao\CoreBundle\Framework\ContaoFramework;
+use Contao\System;
 use Doctrine\DBAL\Connection;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
@@ -93,8 +94,37 @@ class BackendUserLogin
 		}
 
 		$this->tokenStorage->setToken(new UsernamePasswordToken($user, self::FIREWALL, $user->getRoles()));
+		self::replaceLegacyInstance($user);
 
 		return $user;
+	}
+
+	/**
+	 * Setzt den Benutzer auch dort, wo älterer Code ihn sucht.
+	 *
+	 * Erweiterungen holen den Benutzer oft über $this->import(BackendUser::class)
+	 * oder BackendUser::getInstance(). Beides merkt sich das erste Ergebnis
+	 * für die ganze Anfrage (User::$objInstance, System::$arrSingletons).
+	 * Fragt ein Hook beim Start von Contao den Benutzer ab, bevor dieser
+	 * Dienst das Token gesetzt hat, ist das ein leerer Benutzer ohne Rechte –
+	 * und Callbacks wie checkPermission() der Erweiterung sähen ihn statt des
+	 * angemeldeten. Deshalb werden beide Zwischenspeicher hier überschrieben.
+	 *
+	 * @param BackendUser|null $user Der angemeldete Benutzer, null zum Zurücksetzen
+	 */
+	private static function replaceLegacyInstance(?BackendUser $user): void
+	{
+		\Closure::bind(static function () use ($user): void {
+			BackendUser::$objInstance = $user;
+		}, null, BackendUser::class)();
+
+		\Closure::bind(static function () use ($user): void {
+			if (null === $user) {
+				unset(System::$arrSingletons[BackendUser::class]);
+			} else {
+				System::$arrSingletons[BackendUser::class] = $user;
+			}
+		}, null, System::class)();
 	}
 
 	/**
@@ -106,5 +136,6 @@ class BackendUserLogin
 	public function logout(): void
 	{
 		$this->tokenStorage->setToken(null);
+		self::replaceLegacyInstance(null);
 	}
 }

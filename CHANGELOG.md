@@ -5,6 +5,7 @@
 * Add: `folder_create` legt einen Ordner unter files/ an (eine Ebene, in den Dateifreigaben, Recht „Dateien hochladen“)
 * Add: `file_move` verschiebt oder benennt Dateien und Ordner um über Folder/File::renameTo(); UUID bleibt, nichts wird überschrieben, Endung bleibt, Recht „Dateien bearbeiten“, Eintrag im Claude-Protokoll
 * Change: `file_upload` nimmt SVG/SVGZ an und bereinigt sie wie Contao 5 beim Upload (enshrined/svg-sanitize)
+* Fix: Erweiterungen, die den Benutzer über import(BackendUser::class) oder BackendUser::getInstance() holen, sahen einen leeren Benutzer, wenn sie ihn schon beim Start von Contao abgefragt hatten (etwa checkPermission() von PCT CustomElements); beide Zwischenspeicher werden jetzt beim Anmelden gesetzt und beim Abmelden geleert
 * Change: Interne Schreibfehler nennen Datei und Zeile des Fehlers und den ersten Aufrufer außerhalb von Contao/Symfony (etwa den Callback einer Erweiterung)
 * Change: Nur noch Contao 5.3+ (composer: contao/core-bundle ^5.3, Symfony ^6.4 || ^7.0); 4.13-Zweige im Schreibpfad (WriteDataContainer) und bei den Feldrechten entfernt
 
