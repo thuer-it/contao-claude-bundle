@@ -270,7 +270,7 @@ class FileWriter
 		}
 
 		if (!is_dir($this->projectDir.'/'.$folder)) {
-			throw new ToolCallException(sprintf('Den Ordner %s gibt es nicht. Neue Ordner legt ein Mensch in der Dateiverwaltung an.', $folder));
+			throw new ToolCallException(sprintf('Den Ordner %s gibt es nicht. Neue Ordner legt folder_create an.', $folder));
 		}
 
 		if (!$this->permissions->canReadPath($folder)) {

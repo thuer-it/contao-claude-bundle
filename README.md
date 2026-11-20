@@ -247,7 +247,7 @@ Scheitert ein Feld, bleibt der Datensatz, wie er war.
   löscht nur nach ausdrücklicher Bestätigung.
 - Dateien: nie überschreiben, SVG wie im Backend bereinigt, nur die Dateitypen und die Größe aus
   den Einstellungen, Download nur über https und nur von öffentlichen Adressen.
-  Neue Ordner legt ein Mensch an. Große Bilder werden nicht verkleinert.
+  Neue Ordner nur mit folder_create. Große Bilder werden nicht verkleinert.
 - Werte kommen in der Form von `record_get` zurück: ISO-Datum, Dateipfad statt
   UUID, `true`/`false`. Das Bundle wandelt sie in das Format der Installation.
 
