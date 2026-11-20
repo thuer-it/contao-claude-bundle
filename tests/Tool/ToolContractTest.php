@@ -56,7 +56,7 @@ class ToolContractTest extends TestCase
 
 		sort($names);
 
-		$this->assertSame(array('article_list', 'content_create', 'content_list', 'content_update', 'dca_describe', 'file_list', 'file_meta_update', 'file_upload', 'news_create', 'news_get', 'news_search', 'news_update', 'page_tree', 'preview_url', 'publish_toggle', 'record_delete', 'record_get', 'record_history', 'record_list', 'record_restore', 'record_save', 'site_info'), $names);
+		$this->assertSame(array('article_list', 'content_create', 'content_list', 'content_update', 'dca_describe', 'file_list', 'file_meta_update', 'file_move', 'file_upload', 'folder_create', 'news_create', 'news_get', 'news_search', 'news_update', 'page_tree', 'preview_url', 'publish_toggle', 'record_delete', 'record_get', 'record_history', 'record_list', 'record_restore', 'record_save', 'site_info'), $names);
 	}
 
 	/**

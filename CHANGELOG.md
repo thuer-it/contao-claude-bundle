@@ -1,5 +1,10 @@
 # Changelog
 
+## Unveröffentlicht (Fork thuer-it)
+
+* Add: `folder_create` legt einen Ordner unter files/ an (eine Ebene, in den Dateifreigaben, Recht „Dateien hochladen“)
+* Add: `file_move` verschiebt oder benennt Dateien und Ordner um über Folder/File::renameTo(); UUID bleibt, nichts wird überschrieben, Endung bleibt, Recht „Dateien bearbeiten“, Eintrag im Claude-Protokoll
+
 ## Version 0.5.2 (2026-11-04)
 
 * Add: System → Claude-Verbindungen zeigt aufklappbar die Adresse für den Konnektor, die Schritte in claude.ai und die bekannten Fehlerbilder beim Verbinden
