@@ -579,7 +579,46 @@ class RecordWriter
 
 		$this->logger->error('Schreibvorgang über Claude fehlgeschlagen: '.$exception->getMessage(), array('exception' => $exception));
 
-		return sprintf('Interner Fehler beim Schreiben (%s): %s', (new \ReflectionClass($exception))->getShortName(), $exception->getMessage());
+		return sprintf('Interner Fehler beim Schreiben (%s): %s%s', (new \ReflectionClass($exception))->getShortName(), $exception->getMessage(), self::describeOrigin($exception));
+	}
+
+	/**
+	 * Nennt die Stelle, an der ein Fehler entstand, und die erste Stelle
+	 * außerhalb von Contao, Symfony und diesem Bundle (meist der Callback
+	 * einer Erweiterung). Pfade relativ zu vendor/, damit nichts über das
+	 * Serververzeichnis verraten wird.
+	 *
+	 * @param \Throwable $exception Der Fehler
+	 *
+	 * @return string Etwa „ – in vendor/a/b/src/X.php:42, aufgerufen aus …“, leer ohne Angaben
+	 */
+	private static function describeOrigin(\Throwable $exception): string
+	{
+		$short = static function (string $file): string {
+			$position = strpos($file, '/vendor/');
+
+			return false === $position ? basename($file) : substr($file, $position + 1);
+		};
+
+		$parts = array(sprintf('in %s:%d', $short($exception->getFile()), $exception->getLine()));
+
+		foreach ($exception->getTrace() as $frame) {
+			$file = (string) ($frame['file'] ?? '');
+
+			if ('' === $file || preg_match('~/vendor/(contao|symfony|doctrine|schachbulle)/~', $file) || str_contains($file, '/contao-claude-bundle/')) {
+				continue;
+			}
+
+			$caller = sprintf('%s:%d', $short($file), (int) ($frame['line'] ?? 0));
+
+			if ($caller !== substr($parts[0], 3)) {
+				$parts[] = 'aufgerufen aus '.$caller;
+			}
+
+			break;
+		}
+
+		return ' – '.implode(', ', $parts).'. Einzelheiten im Log (var/log).';
 	}
 
 	/**
