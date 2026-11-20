@@ -7,7 +7,7 @@ eine Schnittstelle statt über die Backend-Oberfläche. Jeder Redakteur meldet
 sich mit seinem eigenen Backend-Zugang an, und Claude bekommt genau dessen
 Rechte, nie mehr.
 
-Läuft mit **einem** Code-Stand unter Contao 4.13 und Contao 5.7.
+Läuft unter Contao 5.3 bis 5.7 (Contao 4.13 wird in diesem Fork nicht mehr unterstützt).
 
 > **Stand: Fassung 0.5.** Lesende und schreibende Werkzeuge, Anmeldung über
 > OAuth 2.1 mit dem eigenen Backend-Zugang, Protokoll aller Schreibvorgänge und
@@ -15,7 +15,7 @@ Läuft mit **einem** Code-Stand unter Contao 4.13 und Contao 5.7.
 
 ## Voraussetzungen
 
-- Contao 4.13 oder 5.3 bis 5.7
+- Contao 5.3 bis 5.7
 - PHP 8.1 oder neuer
 - Für claude.ai, Desktop und Handy: die Installation muss **öffentlich per
   HTTPS** erreichbar sein, denn diese Anfragen kommen aus Anthropics

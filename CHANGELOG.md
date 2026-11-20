@@ -4,7 +4,8 @@
 
 * Add: `folder_create` legt einen Ordner unter files/ an (eine Ebene, in den Dateifreigaben, Recht „Dateien hochladen“)
 * Add: `file_move` verschiebt oder benennt Dateien und Ordner um über Folder/File::renameTo(); UUID bleibt, nichts wird überschrieben, Endung bleibt, Recht „Dateien bearbeiten“, Eintrag im Claude-Protokoll
-* Change: `file_upload` nimmt SVG/SVGZ an und bereinigt sie wie Contao 5 beim Upload (enshrined/svg-sanitize); ohne die Bibliothek (4.13) weiter abgewiesen
+* Change: `file_upload` nimmt SVG/SVGZ an und bereinigt sie wie Contao 5 beim Upload (enshrined/svg-sanitize)
+* Change: Nur noch Contao 5.3+ (composer: contao/core-bundle ^5.3, Symfony ^6.4 || ^7.0); 4.13-Zweige im Schreibpfad (WriteDataContainer) und bei den Feldrechten entfernt
 
 ## Version 0.5.2 (2026-11-04)
 

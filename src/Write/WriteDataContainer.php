@@ -14,7 +14,6 @@ namespace Schachbulle\ContaoClaudeBundle\Write;
 use Contao\CoreBundle\Exception\ResponseException;
 use Contao\CoreBundle\Security\ContaoCorePermissions;
 use Contao\CoreBundle\Security\DataContainer\UpdateAction;
-use Contao\Database;
 use Contao\DC_Table;
 use Contao\StringUtil;
 use Contao\System;
@@ -41,9 +40,8 @@ use Contao\Widget;
  *   dessen setzt saveField() ein Feld nach dem anderen, mit derselben
  *   Abfolge wie edit() und DataContainer::row().
  *
- * Contao 4.13 schreibt jedes Feld sofort (save() führt das UPDATE aus),
  * Contao 5 sammelt die Werte und schreibt sie in submit(), nach der
- * Prüfung durch die DataContainer-Voter. finishEdit() trägt dem Rechnung.
+ * Prüfung durch die DataContainer-Voter.
  * Der Aufrufer (RecordWriter) hält alles in einer Datenbank-Transaktion,
  * damit ein Fehler im dritten Feld nicht die ersten zwei gespeichert lässt.
  *
@@ -130,25 +128,15 @@ class WriteDataContainer extends DC_Table
 	{
 		$this->intId = $id;
 
-		if (self::isContao5()) {
-			$currentRecord = $this->getCurrentRecord();
+		$currentRecord = $this->getCurrentRecord();
 
-			if (null === $currentRecord) {
-				throw new \RuntimeException(sprintf('Den Datensatz %d in %s gibt es nicht.', $id, $this->strTable));
-			}
-
-			$this->denyAccessUnlessGranted(ContaoCorePermissions::DC_PREFIX.$this->strTable, new UpdateAction($this->strTable, $currentRecord));
-			$this->objActiveRecord = (object) $currentRecord;
-			$this->arrSubmit = array();
-		} else {
-			$row = Database::getInstance()->prepare('SELECT * FROM '.$this->strTable.' WHERE id=?')->limit(1)->execute($id);
-
-			if ($row->numRows < 1) {
-				throw new \RuntimeException(sprintf('Den Datensatz %d in %s gibt es nicht.', $id, $this->strTable));
-			}
-
-			$this->objActiveRecord = $row;
+		if (null === $currentRecord) {
+			throw new \RuntimeException(sprintf('Den Datensatz %d in %s gibt es nicht.', $id, $this->strTable));
 		}
+
+		$this->denyAccessUnlessGranted(ContaoCorePermissions::DC_PREFIX.$this->strTable, new UpdateAction($this->strTable, $currentRecord));
+		$this->objActiveRecord = (object) $currentRecord;
+		$this->arrSubmit = array();
 
 		$this->values = array($id);
 		$this->procedure = array('id=?');
@@ -289,40 +277,13 @@ class WriteDataContainer extends DC_Table
 	/**
 	 * Schließt das Bearbeiten ab, wie das Ende von edit().
 	 *
-	 * Contao 5: submit() prüft die neuen Werte mit dem DataContainer-Voter,
-	 * schreibt sie, leert die Cache-Tags, ruft onsubmit_callback auf und
-	 * legt die Version an. Contao 4.13 hat die Werte schon geschrieben; hier
-	 * folgen onsubmit_callback, tstamp (und ptable), Version und Cache-Tags.
+	 * submit() prüft die neuen Werte mit dem DataContainer-Voter, schreibt
+	 * sie, leert die Cache-Tags, ruft onsubmit_callback auf und legt die
+	 * Version an.
 	 */
 	public function finishEdit(): void
 	{
-		if (self::isContao5()) {
-			$this->submit();
-
-			return;
-		}
-
-		foreach ((array) ($GLOBALS['TL_DCA'][$this->strTable]['config']['onsubmit_callback'] ?? array()) as $callback) {
-			if (\is_array($callback)) {
-				System::importStatic($callback[0])->{$callback[1]}($this);
-			} elseif (\is_callable($callback)) {
-				$callback($this);
-			}
-		}
-
-		$database = Database::getInstance();
-
-		if ($GLOBALS['TL_DCA'][$this->strTable]['config']['dynamicPtable'] ?? null) {
-			$database->prepare('UPDATE '.$this->strTable.' SET ptable=?, tstamp=? WHERE id=?')->execute($this->ptable, time(), $this->intId);
-		} else {
-			$database->prepare('UPDATE '.$this->strTable.' SET tstamp=? WHERE id=?')->execute(time(), $this->intId);
-		}
-
-		if ($this->blnCreateNewVersion) {
-			$this->editVersions?->create();
-		}
-
-		$this->invalidateCacheTags();
+		$this->submit();
 	}
 
 	/**
@@ -337,9 +298,7 @@ class WriteDataContainer extends DC_Table
 
 		(new Versions($this->strTable, $id))->restore($version);
 
-		if (self::isContao5()) {
-			self::clearCurrentRecordCache($id, $this->strTable);
-		}
+		self::clearCurrentRecordCache($id, $this->strTable);
 
 		$this->invalidateCacheTags();
 	}
@@ -382,28 +341,11 @@ class WriteDataContainer extends DC_Table
 	 */
 	private function getCurrentValue(string $field)
 	{
-		if (self::isContao5()) {
-			if (\array_key_exists($field, $this->arrSubmit)) {
-				return $this->arrSubmit[$field];
-			}
-
-			return $this->getCurrentRecord()[$field] ?? null;
+		if (\array_key_exists($field, $this->arrSubmit)) {
+			return $this->arrSubmit[$field];
 		}
 
-		return $this->objActiveRecord->{$field};
-	}
-
-	/**
-	 * Gibt an, ob Contao 5 läuft.
-	 *
-	 * Erkennungszeichen ist DC_Table::submit(), das es erst seit Contao 5
-	 * gibt; mit ihm hat sich die Art des Speicherns geändert.
-	 *
-	 * @return bool true unter Contao 5
-	 */
-	public static function isContao5(): bool
-	{
-		return method_exists(DC_Table::class, 'submit');
+		return $this->getCurrentRecord()[$field] ?? null;
 	}
 
 	/**

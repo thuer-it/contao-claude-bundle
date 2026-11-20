@@ -12,7 +12,6 @@ declare(strict_types=1);
 namespace Schachbulle\ContaoClaudeBundle\Security;
 
 use Contao\BackendUser;
-use Contao\CoreBundle\ContaoCoreBundle;
 use Contao\CoreBundle\Framework\ContaoFramework;
 use Contao\CoreBundle\Security\ContaoCorePermissions;
 use Contao\Database;
@@ -99,10 +98,9 @@ class Permissions
 	 * Prüft, ob der Benutzer ein Feld bearbeiten darf.
 	 *
 	 * Ausgeschlossene Felder („exclude“) brauchen die Freigabe „erlaubte
-	 * Felder“ (alexf) der Benutzergruppe. Was ohne Angabe gilt, hängt von
-	 * der Fassung ab: In Contao 4.13 ist ein Feld ohne „exclude“ frei, in
-	 * Contao 5 gesperrt (TableAccessVoter liest „exclude ?? true“); frei ist
-	 * dort nur, was ausdrücklich „exclude => false“ trägt. Fürs Lesen gilt
+	 * Felder“ (alexf) der Benutzergruppe. Ohne Angabe gilt ein Feld als
+	 * gesperrt (TableAccessVoter liest „exclude ?? true“); frei ist nur, was
+	 * ausdrücklich „exclude => false“ trägt. Fürs Lesen gilt
 	 * das nicht (siehe TableAccess::getReadableFields()); gebraucht wird die
 	 * Prüfung von den schreibenden Werkzeugen und von dca_describe.
 	 *
@@ -114,7 +112,7 @@ class Permissions
 	 */
 	public function canEditField(string $table, string $field, array $config): bool
 	{
-		if (!($config['exclude'] ?? self::isContao5())) {
+		if (!($config['exclude'] ?? true)) {
 			return true;
 		}
 
@@ -150,16 +148,6 @@ class Permissions
 		}
 
 		return $this->authorizationChecker->isGranted(\constant($constant), $table.'::'.$operation);
-	}
-
-	/**
-	 * Gibt an, ob Contao 5 läuft.
-	 *
-	 * @return bool true ab Contao 5.0
-	 */
-	public static function isContao5(): bool
-	{
-		return version_compare(ContaoCoreBundle::getVersion(), '5.0', '>=');
 	}
 
 	/**
