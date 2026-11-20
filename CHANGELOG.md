@@ -4,6 +4,7 @@
 
 * Add: `folder_create` legt einen Ordner unter files/ an (eine Ebene, in den Dateifreigaben, Recht „Dateien hochladen“)
 * Add: `file_move` verschiebt oder benennt Dateien und Ordner um über Folder/File::renameTo(); UUID bleibt, nichts wird überschrieben, Endung bleibt, Recht „Dateien bearbeiten“, Eintrag im Claude-Protokoll
+* Change: `file_upload` nimmt SVG/SVGZ an und bereinigt sie wie Contao 5 beim Upload (enshrined/svg-sanitize); ohne die Bibliothek (4.13) weiter abgewiesen
 
 ## Version 0.5.2 (2026-11-04)
 

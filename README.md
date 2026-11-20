@@ -245,7 +245,7 @@ Scheitert ein Feld, bleibt der Datensatz, wie er war.
 - Vor dem Löschen sucht das Bundle nach Verweisen (Insert-Tags,
   Weiterleitungen, eingebundene Elemente, mitgelöschte Kinddatensätze) und
   löscht nur nach ausdrücklicher Bestätigung.
-- Dateien: nie überschreiben, kein SVG, nur die Dateitypen und die Größe aus
+- Dateien: nie überschreiben, SVG wie im Backend bereinigt, nur die Dateitypen und die Größe aus
   den Einstellungen, Download nur über https und nur von öffentlichen Adressen.
   Neue Ordner legt ein Mensch an. Große Bilder werden nicht verkleinert.
 - Werte kommen in der Form von `record_get` zurück: ISO-Datum, Dateipfad statt

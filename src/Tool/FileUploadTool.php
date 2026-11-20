@@ -54,7 +54,7 @@ class FileUploadTool extends AbstractWriteTool
 	 */
 	public function getDescription(): string
 	{
-		return 'Legt eine neue Datei in einem vorhandenen Ordner unter files/ ab, Inhalt als Base64 (contentBase64) oder von einer öffentlichen https-Adresse (url). Vorhandene Dateien werden nie überschrieben; erlaubt sind die Dateitypen und die Größe aus den Contao-Einstellungen, SVG nicht. Der Name wird wie beim Upload bereinigt. Optional gleich Titel und Alternativtext für eine Sprache. Den Pfad danach in Dateifeldern wie singleSRC verwenden.';
+		return 'Legt eine neue Datei in einem vorhandenen Ordner unter files/ ab, Inhalt als Base64 (contentBase64) oder von einer öffentlichen https-Adresse (url). Vorhandene Dateien werden nie überschrieben; erlaubt sind die Dateitypen und die Größe aus den Contao-Einstellungen; SVG wird wie im Backend bereinigt. Der Name wird wie beim Upload bereinigt. Optional gleich Titel und Alternativtext für eine Sprache. Den Pfad danach in Dateifeldern wie singleSRC verwenden.';
 	}
 
 	/**

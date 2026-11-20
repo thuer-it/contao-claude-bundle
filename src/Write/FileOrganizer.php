@@ -46,7 +46,7 @@ class FileOrganizer
 	 * Endungen, die weder neu entstehen noch als Zielname dienen dürfen.
 	 * Gleiche Liste wie beim Hochladen.
 	 */
-	private const FORBIDDEN_EXTENSIONS = array('svg', 'svgz', 'php', 'phtml', 'phar', 'htm', 'html', 'js', 'htaccess');
+	private const FORBIDDEN_EXTENSIONS = array('php', 'phtml', 'phar', 'htm', 'html', 'js', 'htaccess');
 
 	/**
 	 * @param ContaoFramework               $framework     Für StringUtil und FilesModel

@@ -38,8 +38,10 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
  * Strenger als das Backend:
  *
  * - Vorhandene Dateien werden nie überschrieben.
- * - SVG ist ausgeschlossen, weil SVG Skripte enthalten kann und Contao 4.13
- *   SVGs beim Upload nicht bereinigt.
+ * - SVG und SVGZ werden wie beim Upload in Contao 5 mit enshrined/svg-sanitize
+ *   bereinigt (Skripte, Ereignis-Attribute, fremde Verweise fallen heraus).
+ *   Fehlt die Bibliothek (Contao 4.13) oder ist die Datei kein gültiges SVG,
+ *   wird abgewiesen.
  * - Beim Abruf über eine Adresse nur HTTPS und nur öffentliche Adressen
  *   (NoPrivateNetworkHttpClient): Eine untergeschobene Anweisung könnte
  *   sonst Dateien aus dem internen Netz des Servers in /files holen.
@@ -51,7 +53,7 @@ class FileWriter
 	/**
 	 * Endungen, die Claude nie hochladen darf.
 	 */
-	private const FORBIDDEN_EXTENSIONS = array('svg', 'svgz', 'php', 'phtml', 'phar', 'htm', 'html', 'js', 'htaccess');
+	private const FORBIDDEN_EXTENSIONS = array('php', 'phtml', 'phar', 'htm', 'html', 'js', 'htaccess');
 
 	/**
 	 * Zeitlimit für das Herunterladen, in Sekunden.
@@ -113,6 +115,10 @@ class FileWriter
 			}
 
 			$content = $this->fetchContent($base64, $url);
+
+			if (\in_array(strtolower(pathinfo($filename, PATHINFO_EXTENSION)), array('svg', 'svgz'), true)) {
+				$content = $this->sanitizeSvg($content);
+			}
 
 			if (false === file_put_contents($absolute, $content)) {
 				throw new ToolCallException(sprintf('Die Datei %s ließ sich nicht schreiben.', $path));
@@ -297,6 +303,39 @@ class FileWriter
 		}
 
 		return $filename;
+	}
+
+	/**
+	 * Bereinigt ein SVG wie Contao 5 beim Upload (FileUpload::sanitizeSvg()).
+	 *
+	 * Gzip-gepackte Dateien (SVGZ) werden entpackt, bereinigt und wieder
+	 * gepackt.
+	 *
+	 * @param string $content Inhalt der Datei
+	 *
+	 * @return string Der bereinigte Inhalt
+	 *
+	 * @throws ToolCallException Ohne Bibliothek oder bei ungültigem SVG
+	 */
+	private function sanitizeSvg(string $content): string
+	{
+		if (!class_exists(\enshrined\svgSanitize\Sanitizer::class)) {
+			throw new ToolCallException('SVG-Dateien lassen sich hier nicht bereinigen (enshrined/svg-sanitize fehlt, etwa unter Contao 4.13) und werden deshalb nicht angenommen.');
+		}
+
+		$gzip = str_starts_with($content, "\x1F\x8B");
+
+		if ($gzip) {
+			$content = (string) @gzdecode($content);
+		}
+
+		$clean = '' === $content ? false : (new \enshrined\svgSanitize\Sanitizer())->sanitize($content);
+
+		if (!\is_string($clean) || '' === $clean) {
+			throw new ToolCallException('Die Datei ist kein gültiges SVG.');
+		}
+
+		return $gzip ? (string) gzencode($clean) : $clean;
 	}
 
 	/**
